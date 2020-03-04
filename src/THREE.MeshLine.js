@@ -2,13 +2,13 @@
 
 "use strict";
 
-var root = this
+var root = this;
 
-var has_require = typeof require !== 'undefined'
+var has_require = typeof require !== 'undefined';
 
-var THREE = root.THREE || has_require && require('three')
+var THREE = root.THREE || has_require && require('three');
 if( !THREE )
-	throw new Error( 'MeshLine requires three.js' )
+	throw new Error( 'MeshLine requires three.js' );
 
 function MeshLine() {
 
@@ -31,7 +31,7 @@ function MeshLine() {
 
 MeshLine.prototype.setMatrixWorld = function(matrixWorld) {
 	this.matrixWorld = matrixWorld;
-}
+};
 
 
 MeshLine.prototype.setGeometry = function( g, c ) {
@@ -72,7 +72,7 @@ MeshLine.prototype.setGeometry = function( g, c ) {
 
 	this.process();
 
-}
+};
 
 MeshLine.prototype.raycast = ( function () {
 
@@ -82,7 +82,7 @@ MeshLine.prototype.raycast = ( function () {
 
 	return function raycast( raycaster, intersects ) {
 
-		var precision = raycaster.linePrecision;
+		var precision = raycaster.params.Line.threshold;
 		var precisionSq = precision * precision;
 		var interRay = new THREE.Vector3();
 
@@ -233,14 +233,14 @@ MeshLine.prototype.compareV3 = function( a, b ) {
 	var ab = b * 6;
 	return ( this.positions[ aa ] === this.positions[ ab ] ) && ( this.positions[ aa + 1 ] === this.positions[ ab + 1 ] ) && ( this.positions[ aa + 2 ] === this.positions[ ab + 2 ] );
 
-}
+};
 
 MeshLine.prototype.copyV3 = function( a ) {
 
 	var aa = a * 6;
 	return [ this.positions[ aa ], this.positions[ aa + 1 ], this.positions[ aa + 2 ] ];
 
-}
+};
 
 MeshLine.prototype.process = function() {
 
@@ -344,27 +344,27 @@ MeshLine.prototype.process = function() {
 
 	this.geometry.setIndex( this.attributes.index );
 
-}
+};
 
 function memcpy (src, srcOffset, dst, dstOffset, length) {
-	var i
+	var i;
 
-	src = src.subarray || src.slice ? src : src.buffer
-	dst = dst.subarray || dst.slice ? dst : dst.buffer
+	src = src.subarray || src.slice ? src : src.buffer;
+	dst = dst.subarray || dst.slice ? dst : dst.buffer;
 
 	src = srcOffset ? src.subarray ?
 	src.subarray(srcOffset, length && srcOffset + length) :
-	src.slice(srcOffset, length && srcOffset + length) : src
+	src.slice(srcOffset, length && srcOffset + length) : src;
 
 	if (dst.set) {
 		dst.set(src, dstOffset)
 	} else {
 		for (i=0; i<src.length; i++) {
-			dst[i + dstOffset] = src[i]
+			dst[i + dstOffset] = src[i];
 		}
 	}
 
-	return dst
+	return dst;
 }
 
 /**
