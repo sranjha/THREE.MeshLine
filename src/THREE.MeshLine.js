@@ -35,7 +35,7 @@ MeshLine.prototype.setMatrixWorld = function(matrixWorld) {
 
 
 MeshLine.prototype.setGeometry = function( g, c ) {
-	
+
 	this.widthCallback = c;
 
 	this.positions = [];
@@ -101,7 +101,7 @@ MeshLine.prototype.raycast = ( function () {
 
 		}
 
-		inverseMatrix.getInverse( this.matrixWorld );
+		inverseMatrix.copy( this.matrixWorld ).invert();
 		ray.copy( raycaster.ray ).applyMatrix4( inverseMatrix );
 
 		var vStart = new THREE.Vector3();
