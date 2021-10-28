@@ -35,44 +35,46 @@ MeshLine.prototype.setMatrixWorld = function(matrixWorld) {
 
 
 MeshLine.prototype.setGeometry = function( g, c ) {
+	this._geometry = g;
+	this.setPoints(g.getAttribute("position").array, c);
+};
 
-	this.widthCallback = c;
-
+MeshLine.prototype.setPoints = function(points, wcb) {
+	if (!(points instanceof Float32Array) && !(points instanceof Array)) {
+		console.error(
+			"ERROR: The BufferArray of points is not instancied correctly."
+		);
+		return;
+	}
+	// as the points are mutated we store them
+	// for later retreival when necessary (declaritive architectures)
+	this._points = points;
+	this.widthCallback = wcb;
 	this.positions = [];
 	this.counters = [];
-	// g.computeBoundingBox();
-	// g.computeBoundingSphere();
-
-	// set the normals
-	// g.computeVertexNormals();
-	if( g instanceof THREE.Geometry ) {
-		for( var j = 0; j < g.vertices.length; j++ ) {
-			var v = g.vertices[ j ];
-			var c = j/g.vertices.length;
-			this.positions.push( v.x, v.y, v.z );
-			this.positions.push( v.x, v.y, v.z );
+	if (points.length && points[0] instanceof THREE.Vector3) {
+		// could transform Vector3 array into the array used below
+		// but this approach will only loop through the array once
+		// and is more performant
+		for (var j = 0; j < points.length; j++) {
+			var p = points[j];
+			var c = j / points.length;
+			this.positions.push(p.x, p.y, p.z);
+			this.positions.push(p.x, p.y, p.z);
+			this.counters.push(c);
+			this.counters.push(c);
+		}
+	} else {
+		for (var j = 0; j < points.length; j += 3) {
+			var c = j / points.length;
+			this.positions.push(points[j], points[j + 1], points[j + 2]);
+			this.positions.push(points[j], points[j + 1], points[j + 2]);
 			this.counters.push(c);
 			this.counters.push(c);
 		}
 	}
-
-	if( g instanceof THREE.BufferGeometry ) {
-		// read attribute positions ?
-	}
-
-	if( g instanceof Float32Array || g instanceof Array ) {
-		for( var j = 0; j < g.length; j += 3 ) {
-			var c = j/g.length;
-			this.positions.push( g[ j ], g[ j + 1 ], g[ j + 2 ] );
-			this.positions.push( g[ j ], g[ j + 1 ], g[ j + 2 ] );
-			this.counters.push(c);
-			this.counters.push(c);
-		}
-	}
-
 	this.process();
-
-};
+}
 
 MeshLine.prototype.raycast = ( function () {
 
@@ -185,38 +187,6 @@ MeshLine.prototype.raycast = ( function () {
 					} );
 
 				}
-
-			}
-
-		} else if ( geometry instanceof THREE.Geometry ) {
-
-			var vertices = geometry.vertices;
-			var nbVertices = vertices.length;
-
-			for ( var i = 0; i < nbVertices - 1; i += step ) {
-
-				var distSq = ray.distanceSqToSegment( vertices[ i ], vertices[ i + 1 ], interRay, interSegment );
-
-				if ( distSq > precisionSq ) continue;
-
-				interRay.applyMatrix4( this.matrixWorld ); //Move back to world space for distance calculation
-
-				var distance = raycaster.ray.origin.distanceTo( interRay );
-
-				if ( distance < raycaster.near || distance > raycaster.far ) continue;
-
-				intersects.push( {
-
-					distance: distance,
-					// What do we want? intersection point on the ray or on the segment??
-					// point: raycaster.ray.at( distance ),
-					point: interSegment.clone().applyMatrix4( this.matrixWorld ),
-					index: i,
-					face: null,
-					faceIndex: null,
-					object: this
-
-				} );
 
 			}
 
