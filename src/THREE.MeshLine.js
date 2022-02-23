@@ -372,8 +372,11 @@
 
   THREE.ShaderChunk['meshline_vert'] = [
     '',
+    '#include <common>',
+    '',
     THREE.ShaderChunk.logdepthbuf_pars_vertex,
     THREE.ShaderChunk.fog_pars_vertex,
+    THREE.ShaderChunk.clipping_planes_pars_vertex,
     '',
     'attribute vec3 previous;',
     'attribute vec3 next;',
@@ -402,6 +405,8 @@
     '',
     'void main() {',
     '',
+    THREE.ShaderChunk.begin_vertex,
+    THREE.ShaderChunk.project_vertex,
     '    float aspect = resolution.x / resolution.y;',
     '',
     '    vColor = vec4( color, opacity );',
@@ -428,11 +433,9 @@
     '',
     '        vec2 perp = vec2( -dir1.y, dir1.x );',
     '        vec2 miter = vec2( -dir.y, dir.x );',
-    '        //w = clamp( w / dot( miter, perp ), 0., 4. * lineWidth * width );',
     '',
     '    }',
     '',
-    '    //vec2 normal = ( cross( vec3( dir, 0. ), vec3( 0., 0., 1. ) ) ).xy;',
     '    vec4 normal = vec4( -dir.y, dir.x, 0., 1. );',
     '    normal.xy *= .5 * w;',
     '    normal *= projectionMatrix;',
@@ -446,15 +449,16 @@
     '    gl_Position = finalPosition;',
     '',
     THREE.ShaderChunk.logdepthbuf_vertex,
-    THREE.ShaderChunk.fog_vertex && '    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );',
+    THREE.ShaderChunk.clipping_planes_vertex,
     THREE.ShaderChunk.fog_vertex,
-    '}',
+    '}'
   ].join('\n')
 
   THREE.ShaderChunk['meshline_frag'] = [
     '',
     THREE.ShaderChunk.fog_pars_fragment,
     THREE.ShaderChunk.logdepthbuf_pars_fragment,
+    THREE.ShaderChunk.clipping_planes_pars_fragment,
     '',
     'uniform sampler2D map;',
     'uniform sampler2D alphaMap;',
@@ -475,6 +479,7 @@
     'void main() {',
     '',
     THREE.ShaderChunk.logdepthbuf_fragment,
+    THREE.ShaderChunk.clipping_planes_fragment,
     '',
     '    vec4 c = vColor;',
     '    if( useMap == 1. ) c *= texture2D( map, vUV * repeat );',
@@ -516,6 +521,8 @@
         vertexShader: THREE.ShaderChunk.meshline_vert,
 
         fragmentShader: THREE.ShaderChunk.meshline_frag,
+
+        clipping: true,
       });
       this.isMeshLineMaterial = true
       this.type = 'MeshLineMaterial'
